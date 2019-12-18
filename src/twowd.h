@@ -60,9 +60,19 @@ public:
 protected:
     void clear();
 
-    unsigned long m_lastMs;
+    // Bits that can be set in m_flags bitfield.
+    enum FlagBits
+    {
+        TWOWD_FLAG_STOPPED        = 0,
+        TWOWD_FLAG_DRIVE_FORWARD  = (1 << 0),
+        TWOWD_FLAG_DRIVE_BACKWARD = (1 << 1),
+        TWOWD_FLAG_TURN_LEFT      = (1 << 2),
+        TWOWD_FLAG_TURN_RIGHT     = (1 << 3)
+    };
+    
+    uint8_t       m_flags;
+    unsigned long m_driveTimer;
     uint8_t       m_speed;
-    boolean       m_canMove;
     boolean       m_isMoving;
     char          m_ssid[32];
     char          m_password[64];

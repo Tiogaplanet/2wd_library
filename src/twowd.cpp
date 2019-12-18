@@ -91,9 +91,9 @@ TwoWD::~TwoWD()
 
 void TwoWD::clear()
 {
-    m_lastMs = 0;
+    m_flags = 0;
+    m_driveTimer = 0;
     m_speed = TWOWD_MEDIUM_SPEED;
-    m_canMove = true;
     memset(m_ssid, 0, sizeof(m_ssid));
     memset(m_password, 0, sizeof(m_password));
     memset(m_hostname, 0, sizeof(m_hostname));
@@ -140,6 +140,12 @@ void TwoWD::turnRight(uint16_t degrees)
 
 void TwoWD::driveForward()
 {
+  display.setCursor(0, 20);
+  display.println("Forward");
+  display.display();
+  
+  m_flags = TWOWD_FLAG_DRIVE_FORWARD;
+  
   digitalWrite(TWOWD_PULSE_LEFT, HIGH);
   analogWrite(TWOWD_ENABLE_LEFT, m_speed);
   digitalWrite(TWOWD_PULSE_RIGHT, HIGH);
@@ -150,20 +156,26 @@ void TwoWD::driveForward()
 
 void TwoWD::driveForward(uint16_t time)
 {
-    if ((m_lastMs == 0) && m_canMove) {
-    m_lastMs = millis();
-    this->driveForward();
-  }
+    if ((m_driveTimer == 0) && (m_flags == TWOWD_FLAG_STOPPED))
+    {
+       m_driveTimer = millis();
+       this->driveForward();
+    }
 
-  if (((millis() - m_lastMs) > time) && m_canMove) {
+  if (((millis() - m_driveTimer) > time)) {
     this->stop();
-    m_lastMs = 0;
-    m_canMove = false;
+    m_driveTimer = 0;
   }
 }
 
 void TwoWD::driveBackward()
 {
+  display.setCursor(0, 20);
+  display.println("Backward");
+  display.display();
+  
+  m_flags = TWOWD_FLAG_DRIVE_BACKWARD;
+      
   digitalWrite(TWOWD_PULSE_LEFT, LOW);
   analogWrite(TWOWD_ENABLE_LEFT, m_speed);
   digitalWrite(TWOWD_PULSE_RIGHT, LOW);
@@ -174,15 +186,14 @@ void TwoWD::driveBackward()
 
 void TwoWD::driveBackward(uint16_t time)
 {
-    if ((m_lastMs == 0) && m_canMove) {
-    m_lastMs = millis();
+    if ((m_driveTimer == 0) && (m_flags == TWOWD_FLAG_STOPPED)) {
+    m_driveTimer = millis();
     this->driveBackward();
   }
 
-  if (((millis() - m_lastMs) > time) && m_canMove) {
+  if (((millis() - m_driveTimer) > time)) {
     this->stop();
-    m_lastMs = 0;
-    m_canMove = false;
+    m_driveTimer = 0;
   }
 }
 
@@ -192,6 +203,10 @@ void TwoWD::stop()
   analogWrite(TWOWD_ENABLE_RIGHT, TWOWD_STOP_SPEED);
   
   m_isMoving = false;
+  m_flags = TWOWD_FLAG_STOPPED;
+  
+  display.clearDisplay();
+  display.display();
 }
 
 boolean TwoWD::isMoving(){
