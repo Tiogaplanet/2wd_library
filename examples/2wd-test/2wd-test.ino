@@ -2,13 +2,11 @@
 
 TwoWD robot;
 
-boolean isMoving = true;
-
 void setup() {
   // put your setup code here, to run once:
   robot.begin();
 
-
+  robot.setSpeed(180);
 }
 
 void loop() {

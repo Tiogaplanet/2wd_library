@@ -128,6 +128,11 @@ void TwoWD::sleep()
 
 }
 
+void TwoWD::setSpeed(uint8_t speed)
+{
+    m_speed = speed;
+}
+
 void TwoWD::turnLeft(uint16_t degrees)
 {
 
