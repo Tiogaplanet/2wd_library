@@ -21,7 +21,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-// A few default speeds
+// A few default speeds.
 #define TWOWD_STOP_SPEED   0
 #define TWOWD_MEDIUM_SPEED 128
 #define TWOWD_FAST_SPEED   255
@@ -51,11 +51,6 @@ public:
 
     float readDistanceTravelled();
     void  resetDistanceTravelled();
-
-    float readBatteryVoltage();
-
-    void    setUserData(uint8_t addressOffset, uint8_t userData);
-    uint8_t getUserData(uint8_t addressOffset);
 
 protected:
     void clear();
