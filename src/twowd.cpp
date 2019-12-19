@@ -125,7 +125,16 @@ void TwoWD::end()
 
 void TwoWD::sleep()
 {
-
+   // From the DRV8835 (motor driver) datasheet:
+   // http://www.ti.com/lit/ds/symlink/drv8835.pdf
+   // If the VCC pin reaches 0 V, the DRV8835 enters a low-power sleep mode. In this state all unnecessary 
+   // internal circuitry powers down. For minimum supply current, all inputs should be low (0 V) during 
+   // sleep mode.
+   
+   // From the IR sensor product page:
+   // https://www.pololu.com/product/2476
+   // The enable pin, EN, can be driven low to disable the IR emitter and put the sensor into a low-current
+   // stand-by mode.
 }
 
 void TwoWD::setSpeed(uint8_t speed)
