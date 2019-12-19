@@ -133,6 +133,11 @@ void TwoWD::setSpeed(uint8_t speed)
     m_speed = speed;
 }
 
+uint8_t TwoWD::getSpeed()
+{
+   return m_speed;
+}
+
 void TwoWD::turnLeft(uint16_t degrees)
 {
 
