@@ -54,7 +54,7 @@
 // The ENABLE pin can be supplied with a PWM signal to control the motor speed.
 #define TWOWD_ENABLE_RIGHT 6
 
-// DRV8835 VCC pin.  Place the motor controller is a sleep mode by pulling low.
+// Use pin 3 to sleep certain components.  For now, only the motor controller is affected.
 #define TWOWD_SLEEP_ENABLE 3
 
 
@@ -136,12 +136,24 @@ void TwoWD::end()
 
 void TwoWD::sleep()
 {
+   this->clearDisplay();
+   m_oled->setCursor(0, 17);
+   m_oled->println("   Sleeping...");
+   m_oled->display();
+   
    // From the DRV8835 (motor driver) datasheet:
    // http://www.ti.com/lit/ds/symlink/drv8835.pdf
    // If the VCC pin reaches 0 V, the DRV8835 enters a low-power sleep mode. In this state all unnecessary
    // internal circuitry powers down. For minimum supply current, all inputs should be low (0 V) during
    // sleep mode.
-
+   // So...drive all inputs low.
+   digitalWrite(TWOWD_PHASE_LEFT, LOW);
+   digitalWrite(TWOWD_PHASE_RIGHT, LOW);
+   analogWrite(TWOWD_ENABLE_LEFT, TWOWD_STOP_SPEED);
+   analogWrite(TWOWD_ENABLE_RIGHT, TWOWD_STOP_SPEED);
+   // ...and put the motor controller to sleep.
+   digitalWrite(TWOWD_SLEEP_ENABLE, LOW);
+   
    // From the IR sensor product page:
    // https://www.pololu.com/product/2476
    // The enable pin, EN, can be driven low to disable the IR emitter and put the sensor into a low-current
@@ -177,7 +189,7 @@ void TwoWD::driveForward()
 
    m_flags = TWOWD_FLAG_DRIVE_FORWARD;
 
-   // Turn the motor controller on.
+   // Wake the motor controller.
    digitalWrite(TWOWD_SLEEP_ENABLE, HIGH);
 
    // Set both motors for forward movement.
@@ -215,7 +227,7 @@ void TwoWD::driveBackward()
 
    m_flags = TWOWD_FLAG_DRIVE_BACKWARD;
 
-   // Turn the motor controller on.
+   // Wake the motor controller.
    digitalWrite(TWOWD_SLEEP_ENABLE, HIGH);
    
    // Set both motors for backward movement.
@@ -250,7 +262,7 @@ void TwoWD::stop()
    analogWrite(TWOWD_ENABLE_LEFT, TWOWD_STOP_SPEED);
    analogWrite(TWOWD_ENABLE_RIGHT, TWOWD_STOP_SPEED);
 
-   // Turn the motor controller off.
+   // Put the motor controller to sleep.
    digitalWrite(TWOWD_SLEEP_ENABLE, LOW);
    
    m_isMoving = false;
