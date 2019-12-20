@@ -54,6 +54,7 @@ public:
 
 protected:
     void clear();
+    void clearDisplay();
 
     // Bits that can be set in m_flags bitfield.
     enum FlagBits
@@ -64,7 +65,7 @@ protected:
         TWOWD_FLAG_TURN_LEFT      = (1 << 2),
         TWOWD_FLAG_TURN_RIGHT     = (1 << 3)
     };
-    
+
     uint8_t       m_flags;
     unsigned long m_driveTimer;
     uint8_t       m_speed;
@@ -72,6 +73,8 @@ protected:
     char          m_ssid[32];
     char          m_password[64];
     char          m_hostname[63];
+
+    Adafruit_SSD1306 *m_oled;
 };
 
 #endif // TWOWD_H

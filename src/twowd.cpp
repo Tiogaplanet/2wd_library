@@ -56,10 +56,6 @@
 
 
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins).
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
-
 
 // Define an assert mechanism that can be used to log and halt when the user is found to be calling the API incorrectly.
 #define TWOWD_ASSERT(EXPRESSION) if (!(EXPRESSION)) twoWDAssert(__LINE__);
@@ -94,19 +90,32 @@ void TwoWD::clear()
    memset(m_ssid, 0, sizeof(m_ssid));
    memset(m_password, 0, sizeof(m_password));
    memset(m_hostname, 0, sizeof(m_hostname));
+
+   // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins).
+    m_oled = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 }
 
 bool TwoWD::begin()
 {
    Serial.begin(9600);
+   while (!Serial)
+   {
+      ; // Wait for serial port to connect. Needed for Arduinos with native USB.
+        // https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+   }
+   Serial.println(F("2wd says, \"Hello.\""));
 
-   if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_DEVICE_ADDRESS))
+   if (!m_oled->begin(SSD1306_SWITCHCAPVCC, OLED_DEVICE_ADDRESS))
    {
       Serial.println(F("Failed to initialize OLED display."));
    }
-   display.clearDisplay();
-   display.display();
-   
+   m_oled->clearDisplay();
+   m_oled->setTextSize(1);
+   m_oled->setTextColor(WHITE);
+   m_oled->setCursor(0, 0);
+   m_oled->print("     2wd. Hello!");
+   m_oled->display();
+
    pinMode(TWOWD_PHASE_LEFT, OUTPUT);
    pinMode(TWOWD_ENABLE_LEFT, OUTPUT);
    pinMode(TWOWD_PHASE_RIGHT, OUTPUT);
@@ -115,7 +124,7 @@ bool TwoWD::begin()
 
 bool TwoWD::begin(const char* ssid, const char* password, const char* hostname)
 {
-
+   this->begin();
 }
 
 void TwoWD::end()
@@ -127,10 +136,10 @@ void TwoWD::sleep()
 {
    // From the DRV8835 (motor driver) datasheet:
    // http://www.ti.com/lit/ds/symlink/drv8835.pdf
-   // If the VCC pin reaches 0 V, the DRV8835 enters a low-power sleep mode. In this state all unnecessary 
-   // internal circuitry powers down. For minimum supply current, all inputs should be low (0 V) during 
+   // If the VCC pin reaches 0 V, the DRV8835 enters a low-power sleep mode. In this state all unnecessary
+   // internal circuitry powers down. For minimum supply current, all inputs should be low (0 V) during
    // sleep mode.
-   
+
    // From the IR sensor product page:
    // https://www.pololu.com/product/2476
    // The enable pin, EN, can be driven low to disable the IR emitter and put the sensor into a low-current
@@ -159,20 +168,21 @@ void TwoWD::turnRight(uint16_t degrees)
 
 void TwoWD::driveForward()
 {
-   display.setCursor(0, 20);
-   display.println("Forward");
-   display.display();
-  
+   this->clearDisplay();
+   m_oled->setCursor(0, 20);
+   m_oled->println("      Forward");
+   m_oled->display();
+
    m_flags = TWOWD_FLAG_DRIVE_FORWARD;
-  
+
    // Set both motors for forward movement.
    digitalWrite(TWOWD_PHASE_LEFT, HIGH);
    digitalWrite(TWOWD_PHASE_RIGHT, HIGH);
-   
+
    // Start forward movement by writing the speed value onto the ENABLE pins.
    analogWrite(TWOWD_ENABLE_LEFT, m_speed);
    analogWrite(TWOWD_ENABLE_RIGHT, m_speed);
-  
+
    m_isMoving = true;
 }
 
@@ -184,7 +194,7 @@ void TwoWD::driveForward(uint16_t time)
        this->driveForward();
     }
 
-    if (((millis() - m_driveTimer) > time) && (m_flags == TWOWD_FLAG_DRIVE_FORWARD)) 
+    if (((millis() - m_driveTimer) > time) && (m_flags == TWOWD_FLAG_DRIVE_FORWARD))
     {
        this->stop();
        m_driveTimer = 0;
@@ -193,10 +203,11 @@ void TwoWD::driveForward(uint16_t time)
 
 void TwoWD::driveBackward()
 {
-   display.setCursor(0, 20);
-   display.println("Backward");
-   display.display();
-  
+   this->clearDisplay();
+   m_oled->setCursor(0, 55);
+   m_oled->println("      Backward");
+   m_oled->display();
+
    m_flags = TWOWD_FLAG_DRIVE_BACKWARD;
 
    // Set both motors for backward movement.
@@ -226,16 +237,15 @@ void TwoWD::driveBackward(uint16_t time)
 }
 
 void TwoWD::stop()
-{  
+{
    // Stop movement by writing zeros onto the ENABLE pins for both motors.
    analogWrite(TWOWD_ENABLE_LEFT, TWOWD_STOP_SPEED);
    analogWrite(TWOWD_ENABLE_RIGHT, TWOWD_STOP_SPEED);
 
    m_isMoving = false;
    m_flags = TWOWD_FLAG_STOPPED;
-  
-   display.clearDisplay();
-   display.display();
+
+   this->clearDisplay();
 }
 
 boolean TwoWD::isMoving()
@@ -245,10 +255,18 @@ boolean TwoWD::isMoving()
 
 float TwoWD::readDistanceTravelled()
 {
-   
+
 }
 
 void TwoWD::resetDistanceTravelled()
 {
-   
+
+}
+
+// This protected method provides refactoring for the two functions that are
+// needed to clear the OLED display.
+void TwoWD::clearDisplay()
+{
+   m_oled->clearDisplay();
+   m_oled->display();
 }
