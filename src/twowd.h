@@ -43,9 +43,11 @@ public:
     void turnLeft(uint16_t degrees);
     void turnRight(uint16_t degrees);
     void driveForward();
-    void driveForward(uint16_t time);
+    void driveForwardTime(uint16_t time);
+    void driveForwardDistance(uint16_t distance);
     void driveBackward();
-    void driveBackward(uint16_t time);
+    void driveBackwardTime(uint16_t time);
+    void driveBackwardDistance(uint16_t distance);
     void stop();
     boolean isMoving();
 
