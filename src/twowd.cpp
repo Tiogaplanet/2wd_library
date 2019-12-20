@@ -203,7 +203,7 @@ void TwoWD::driveForward()
    m_isMoving = true;
 }
 
-void TwoWD::driveForward(uint16_t time)
+void TwoWD::driveForwardTime(uint16_t time)
 {
     if ((m_driveTimer == 0) && (m_flags == TWOWD_FLAG_STOPPED))
     {
@@ -216,6 +216,13 @@ void TwoWD::driveForward(uint16_t time)
        this->stop();
        m_driveTimer = 0;
     }
+}
+
+void TwoWD::driveForwardDistance(uint16_t distance)
+{
+   // The magnetic encoders on the gear motors have two channels of 12 pulses per channel for a single revolution.  Thus,
+   // there are 24 pulses per revolution.  With wheels of 90mm we can obtain distance granularity of approximately 12mm
+   // (282.74 mm circumference / 24 pulses = 11.78 mm travel distance).  Now to code it all...
 }
 
 void TwoWD::driveBackward()
@@ -241,7 +248,7 @@ void TwoWD::driveBackward()
    m_isMoving = true;
 }
 
-void TwoWD::driveBackward(uint16_t time)
+void TwoWD::driveBackwardTime(uint16_t time)
 {
    if ((m_driveTimer == 0) && (m_flags == TWOWD_FLAG_STOPPED))
    {
@@ -254,6 +261,13 @@ void TwoWD::driveBackward(uint16_t time)
       this->stop();
       m_driveTimer = 0;
    }
+}
+
+void TwoWD::driveBackwardDistance(uint16_t distance)
+{
+   // The magnetic encoders on the gear motors have two channels of 12 pulses per channel for a single revolution.  Thus,
+   // there are 24 pulses per revolution.  With wheels of 90mm we can obtain a distance granularity of approximately 12mm
+   // (282.74 mm circumference / 24 pulses = 11.78 mm travel distance).  Now to code it all...
 }
 
 void TwoWD::stop()
@@ -278,12 +292,12 @@ boolean TwoWD::isMoving()
 
 float TwoWD::readDistanceTravelled()
 {
-
+   // Implement an odometer...
 }
 
 void TwoWD::resetDistanceTravelled()
 {
-
+   // ...and reset it here.
 }
 
 // This protected method provides refactoring for the two functions that are
