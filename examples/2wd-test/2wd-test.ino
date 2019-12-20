@@ -19,12 +19,11 @@ TwoWD robot;
 
 void setup() {
   robot.begin();
-  robot.setSpeed(200);
 }
 
 void loop() {
-  robot.driveForward(2000);
+  robot.driveForwardTime(2000);
   delay(2000);
-  robot.driveBackward(2000);
+  robot.driveBackwardTime(2000);
   delay(2000);
 }
