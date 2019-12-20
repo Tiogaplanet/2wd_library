@@ -10,8 +10,8 @@
    limitations under the License.
 */
 /* Example used in following API documentation:
-    driveForward()
-    driveBackward()
+    driveForwardTime()
+    driveBackwardTime()
 */
 #include <twowd.h>
 
