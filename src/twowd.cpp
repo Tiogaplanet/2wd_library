@@ -54,7 +54,8 @@
 // The ENABLE pin can be supplied with a PWM signal to control the motor speed.
 #define TWOWD_ENABLE_RIGHT 6
 
-
+// DRV8835 VCC pin.  Place the motor controller is a sleep mode by pulling low.
+#define TWOWD_SLEEP_ENABLE 3
 
 
 // Define an assert mechanism that can be used to log and halt when the user is found to be calling the API incorrectly.
@@ -100,8 +101,8 @@ bool TwoWD::begin()
    Serial.begin(9600);
    while (!Serial)
    {
-      ; // Wait for serial port to connect. Needed for Arduinos with native USB.
-        // https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+      // Wait for serial port to connect. Needed for Arduinos with native USB.
+      // https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
    }
    Serial.println(F("2wd says, \"Hello.\""));
 
@@ -120,6 +121,7 @@ bool TwoWD::begin()
    pinMode(TWOWD_ENABLE_LEFT, OUTPUT);
    pinMode(TWOWD_PHASE_RIGHT, OUTPUT);
    pinMode(TWOWD_ENABLE_RIGHT, OUTPUT);
+   pinMode(TWOWD_SLEEP_ENABLE, OUTPUT);
 }
 
 bool TwoWD::begin(const char* ssid, const char* password, const char* hostname)
@@ -175,6 +177,9 @@ void TwoWD::driveForward()
 
    m_flags = TWOWD_FLAG_DRIVE_FORWARD;
 
+   // Turn the motor controller on.
+   digitalWrite(TWOWD_SLEEP_ENABLE, HIGH);
+
    // Set both motors for forward movement.
    digitalWrite(TWOWD_PHASE_LEFT, HIGH);
    digitalWrite(TWOWD_PHASE_RIGHT, HIGH);
@@ -210,6 +215,9 @@ void TwoWD::driveBackward()
 
    m_flags = TWOWD_FLAG_DRIVE_BACKWARD;
 
+   // Turn the motor controller on.
+   digitalWrite(TWOWD_SLEEP_ENABLE, HIGH);
+   
    // Set both motors for backward movement.
    digitalWrite(TWOWD_PHASE_LEFT, LOW);
    digitalWrite(TWOWD_PHASE_RIGHT, LOW);
@@ -242,6 +250,9 @@ void TwoWD::stop()
    analogWrite(TWOWD_ENABLE_LEFT, TWOWD_STOP_SPEED);
    analogWrite(TWOWD_ENABLE_RIGHT, TWOWD_STOP_SPEED);
 
+   // Turn the motor controller off.
+   digitalWrite(TWOWD_SLEEP_ENABLE, LOW);
+   
    m_isMoving = false;
    m_flags = TWOWD_FLAG_STOPPED;
 
