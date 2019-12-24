@@ -55,7 +55,7 @@
 #define TWOWD_ENABLE_RIGHT 6
 
 // Use pin 3 to sleep certain components.  For now, only the motor controller is affected.
-#define TWOWD_SLEEP_ENABLE 3
+#define TWOWD_SLEEP_ENABLE 8
 
 
 // Define an assert mechanism that can be used to log and halt when the user is found to be calling the API incorrectly.
@@ -99,20 +99,20 @@ void TwoWD::clear()
 bool TwoWD::begin()
 {
    Serial.begin(9600);
-   while (!Serial)
-   {
-      // Wait for serial port to connect. Needed for Arduinos with native USB.
-      // https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
-   }
-   Serial.println(F("2wd says, \"Hello.\""));
 
-   if (!m_oled->begin(SSD1306_SWITCHCAPVCC, OLED_DEVICE_ADDRESS))
+   // Serial port (USB) may not be physically connected.
+   if(Serial)
+   {
+      Serial.println(F("2wd says, \"Hello.\""));
+   }
+
+   if (!m_oled->begin(SSD1306_SWITCHCAPVCC, OLED_DEVICE_ADDRESS) && Serial)
    {
       Serial.println(F("Failed to initialize OLED display."));
    }
    m_oled->clearDisplay();
    m_oled->setTextSize(1);
-   m_oled->setTextColor(WHITE);
+   m_oled->setTextColor(WHITE, BLACK);
    m_oled->setCursor(0, 0);
    m_oled->print("     2wd. Hello!");
    m_oled->display();
@@ -136,11 +136,10 @@ void TwoWD::end()
 
 void TwoWD::sleep()
 {
-   this->clearDisplay();
-   m_oled->setCursor(0, 17);
+   m_oled->setCursor(0, 20);
    m_oled->println("   Sleeping...");
    m_oled->display();
-   
+
    // From the DRV8835 (motor driver) datasheet:
    // http://www.ti.com/lit/ds/symlink/drv8835.pdf
    // If the VCC pin reaches 0 V, the DRV8835 enters a low-power sleep mode. In this state all unnecessary
@@ -153,7 +152,7 @@ void TwoWD::sleep()
    analogWrite(TWOWD_ENABLE_RIGHT, TWOWD_STOP_SPEED);
    // ...and put the motor controller to sleep.
    digitalWrite(TWOWD_SLEEP_ENABLE, LOW);
-   
+
    // From the IR sensor product page:
    // https://www.pololu.com/product/2476
    // The enable pin, EN, can be driven low to disable the IR emitter and put the sensor into a low-current
@@ -182,9 +181,8 @@ void TwoWD::turnRight(uint16_t degrees)
 
 void TwoWD::driveForward()
 {
-   this->clearDisplay();
    m_oled->setCursor(0, 20);
-   m_oled->println("      Forward");
+   m_oled->println("       Forward ");
    m_oled->display();
 
    m_flags = TWOWD_FLAG_DRIVE_FORWARD;
@@ -227,16 +225,15 @@ void TwoWD::driveForwardDistance(uint16_t distance)
 
 void TwoWD::driveBackward()
 {
-   this->clearDisplay();
-   m_oled->setCursor(0, 55);
-   m_oled->println("      Backward");
+   m_oled->setCursor(0, 20);
+   m_oled->println("      Backward ");
    m_oled->display();
 
    m_flags = TWOWD_FLAG_DRIVE_BACKWARD;
 
    // Wake the motor controller.
    digitalWrite(TWOWD_SLEEP_ENABLE, HIGH);
-   
+
    // Set both motors for backward movement.
    digitalWrite(TWOWD_PHASE_LEFT, LOW);
    digitalWrite(TWOWD_PHASE_RIGHT, LOW);
@@ -278,11 +275,13 @@ void TwoWD::stop()
 
    // Put the motor controller to sleep.
    digitalWrite(TWOWD_SLEEP_ENABLE, LOW);
-   
+
    m_isMoving = false;
    m_flags = TWOWD_FLAG_STOPPED;
 
-   this->clearDisplay();
+   m_oled->setCursor(0, 20);
+   m_oled->println("         Stop  ");
+   m_oled->display();
 }
 
 boolean TwoWD::isMoving()
@@ -292,12 +291,12 @@ boolean TwoWD::isMoving()
 
 float TwoWD::readDistanceTravelled()
 {
-   // Implement an odometer...
+      // Implement an odometer...
 }
 
 void TwoWD::resetDistanceTravelled()
 {
-   // ...and reset it here.
+      // ...and reset it here.
 }
 
 // This protected method provides refactoring for the two functions that are
